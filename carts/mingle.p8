@@ -1,0 +1,86 @@
+pico-8 cartridge // http://www.pico-8.com
+version 42
+__lua__
+function _init()
+ verts = {}
+ t = 3
+ for i = 1,t do
+  add(verts,{sin(i/t)*40+64,cos(i/t)*40+64})
+ end
+ dust = {}
+ for i = 1,100 do
+  add(dust,{64,64,0,0,rnd(0.5)+0.5,0})
+ end
+ tm=0
+ pal(2,128+1,1)
+end
+function _update60()
+ tm+=1
+ verts = {}
+ t = 3
+ for i = 1,t do
+  add(verts,{sin(i/t+tm*0.01)*40+64,cos(i/t+tm*0.004)*40+64})
+ end
+ for i = 1,count(dust) do
+  g = (i/count(dust))*(t+0.9)+0.01
+  if g < 1 then g +=1 end
+  g1 = flr(g)
+  g2 = ceil(g)
+  //print(g1..","..g2)
+  if g2>t then
+   g2 = 1
+  end
+  g3 = g-g1
+  tx = verts[g1][1]*g3 + verts[g2][1]*(1-g3)
+  ty = verts[g1][2]*g3 + verts[g2][2]*(1-g3)
+  mx = (tx-dust[i][1])*dust[i][5]
+  my = (ty-dust[i][2])*dust[i][5]  
+  dust[i][3] += 0.01*mx*(0.8+rnd(0.2))
+  dust[i][4] += 0.01*my*(0.8+rnd(0.2))
+  dust[i][3] *=0.9
+  dust[i][4] *=0.9
+  dust[i][1] += dust[i][3]
+  dust[i][2] += dust[i][4]
+  dust[i][5] += rnd(0.1)-0.05
+  if abs(mx) < 5 and abs(my) < 5 then
+   dust[i][6] = 12
+  else
+   dust[i][6] = 7
+  end
+ end
+ if btnp(5) then
+  for i = 1,count(dust) do
+   dust[i][3] += (dust[i][1]-64)*rnd(1)
+   dust[i][4] += (dust[i][2]-64)*rnd(1)
+  end
+ end
+end
+function _draw()
+ cls()
+ //for i = 1,count(verts) do
+  //pset(verts[i][1],verts[i][2])
+ //end
+ for i = 0,32 do
+  circfill(64,i*4,20+(sin(i/32+0.25)*5+10+sin(tm*0.01+i/10)*0.5)+rnd(1),2)
+ end
+ for i = 0,32 do
+  circfill(64,i*4,sin(i/32+0.25)*5+10+sin(tm*0.01+i/10)*0.5,1)
+ end
+ for i = 1,count(verts) do
+  g = i+1
+  if g > count(verts) then g=1 end
+  //line(verts[i][1],verts[i][2],verts[g][1],verts[g][2],2)
+ end
+ for i = 1,count(dust) do
+  --pset(dust[i][1],dust[i][2],dust[i][6])
+  circfill(dust[i][1],dust[i][2],dust[i][6]/12,dust[i][6])
+ end
+end
+
+__gfx__
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00700700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00077000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00077000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00700700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
