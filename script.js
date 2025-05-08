@@ -9,19 +9,21 @@ drawOffset = {x:0,y:0}
 playerButtons = [-1,-1,-1,-1,-1,-1,-1,-1]
 resolutionMultiplier = Number(canvas.width)/128
 //resolutionMultiplier = 1\1
-colors = [[0,0,0],[0,0,100],[100,0,0],[0,100,0],[100,50,50],[100,100,100],[150,150,150],[255,255,255],[255,0,0],[255,100,0],[255,255,0],[0,255,0],[100,100,255],[200,200,255],[255,100,200],[255,255,200],[100,100,100]]
+colors = [[0,0,0],[0,0,100],[100,0,0],[0,100,0],[100,50,50],[100,100,100],[150,150,150],[255,255,255],[255,0,0],[255,100,0],[255,255,0],[0,255,0],[100,100,255],[200,200,255],[255,100,200],[255,205,200],[100,100,100]]
 colors2 = [[0,0,0],[0,0,50],[50,0,20],[0,50,50],[50,30,0],[20,20,20],[80,80,80],[255,255,255],[255,0,0],[255,100,0],[255,255,0],[0,255,0],[100,100,255],[200,200,255],[255,100,200],[255,255,200]]
 palmap = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
 //colors[2] = colors2[2]
 r=0
 validChars = "qwertyuiopasdfghjklzxcvbnm1234567890_"
-fetch("./carts/bowling_bash.p8")
+fetch("./carts/surfer.p8")
 .then(x => x.text())
 .then(y => translateCode(y));
 function translateCode(inputCode){
     alert(inputCode)
     alert("Splitting: starting")
+    inputcode+="\n//{}"
     code = inputCode
+
 
     code = code.split("__lua__")[1]
     
@@ -30,8 +32,19 @@ function translateCode(inputCode){
     code = hhh[0]
     
     gfxtext = hhh[1]
-    
-    gfxtext = gfxtext.split("__gff__")[0]
+
+    hhh2 = inputCode.split("__map__")
+
+    doMap = true
+    gfxtext = gfxtext.split("__")[0]
+    try{
+        maptext = hhh2[1].split("__")[0]
+        alert("This is the map"+maptext)
+    }
+    catch{
+        doMap=false
+    }
+
     
     //alert(code)
     alert("Splitting: done")
@@ -281,6 +294,37 @@ function translateCode(inputCode){
         gfx.push(h)
     }
     alert("the graphics were extracted!")
+    if (doMap){
+    mapT = []
+    maplist = maptext.split("\n")
+    for (let y = 1;y<129;y++){
+        h = []
+        for (let x = 0;x<128;x++){
+            //ctx2.beginPath()
+            //alert(x+","+y)
+            if (maplist.length>y){
+                c = maplist[y][x*2]+""+maplist[y][x*2+1]
+                c = parseInt(c, 16);
+                if (c!=undefined){
+                    h.push(c)
+                }
+                else{
+                    h.push(0)
+                }
+
+            }
+            else{
+                h.push(0)
+            }
+        }
+        mapT.push(h)
+    }
+    }
+    alert("the map was extracted!")
+
+
+
+
     output.innerText = newerCode
     eval(newerCode)
 }
@@ -330,9 +374,13 @@ function mset(){
 }
 function pset(x,y,c){
     try{
+        x = (x-drawOffset.x)
+        y = (y-drawOffset.y)
+        if (-3<x<130&&-3<y<130){
         gr = rgbToHex(colors[c][0],colors[c][1],colors[c][2])
         ctx.fillStyle = gr
-        ctx.fillRect((x-drawOffset.x)*resolutionMultiplier,(y-drawOffset.y)*resolutionMultiplier,resolutionMultiplier+0.1,resolutionMultiplier+0.1)
+        ctx.fillRect(x*resolutionMultiplier,y*resolutionMultiplier,resolutionMultiplier+0.5,resolutionMultiplier+0.5)
+        }
     }
     catch{
         //alert("the color "+c+" is broken")
@@ -380,7 +428,8 @@ function atan2(y,x){
     return -Math.atan2(x,y)/(Math.PI*2)
 }
 function rectfill(x1,y1,x2,y2){
-
+    ctx.beginPath()
+    ctx.fillRect((x1-drawOffset.x)*resolutionMultiplier,(y1-drawOffset.y)*resolutionMultiplier,(x2-x1+1)*resolutionMultiplier,(y2-y1+1)*resolutionMultiplier)
 }
 function sqrt(d){
     return Math.sqrt(d)
@@ -605,7 +654,17 @@ spriteCanvas.addEventListener('click', event =>
 
     }
 function map(){
+    for (let i = 0;i<32;i++){
+        for (let d = 0;d<32;d++){
+            if (0<i*8-drawOffset.x<128){
+                if (0<d*8-drawOffset.y<128){
+            mt = mapT[d][i]
+            spr(mt,(i*8),(d*8))
+                }
+            }
 
+        }
+    }
 }
 function camera(x1,y1){
     drawOffset.x = x1
@@ -618,11 +677,5 @@ function ovalfill(){
 
 }
 function deli(l,id){
-    g = []
-    for (let i = 0;i<l.length;i++){
-        if (i!=id){
-            add(g,l[i])
-        }
-    }
-    l = g
+    l = l.splice(id-1,1)
 }
