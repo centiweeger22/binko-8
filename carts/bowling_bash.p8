@@ -29,7 +29,7 @@ end
 
 function create_bumper(x2,y2)
 		add(bumpers,{x=x2,y=y2,cd=0
-		})
+		})//keepObject
 end
 
 function round(val)
@@ -368,12 +368,13 @@ end
 --draw--
 function _draw()
 		cls()
-		map(0,0)
 		local x=(rnd(10)-5)/10
 		local y=(rnd(10)-5)/10
 		
 		camera(cam.x+(x*shake.x),cam.y+(y*shake.y))
 		
+		map(0,0)
+
 		shake.dur-=1
 		if (shake.dur<1) then
 		  shake.dur=0
