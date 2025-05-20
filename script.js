@@ -1,3 +1,4 @@
+alert("Hello World!")
 input = document.getElementById("input")
 btnDis = document.getElementById("buttons")
 output = document.getElementById("output")
@@ -23,7 +24,7 @@ px = new Uint8ClampedArray(g)
 sprite = makeImage(px,8,8)
 r=0
 validChars = "qwertyuiopasdfghjklzxcvbnm1234567890_"
-fetch("./carts/bowling_bash.p8")
+fetch("https://raw.githubusercontent.com/centiweeger22/binko-8/refs/heads/main/carts/bowling_bash.p8")
 .then(x => x.text())
 .then(y => translateCode(y));
 function translateCode(inputCode){
