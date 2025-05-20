@@ -1,27 +1,23 @@
-alert("Hello World!")
 input = document.getElementById("input")
 btnDis = document.getElementById("buttons")
 output = document.getElementById("output")
 canvas = document.getElementById("canvas")
+
 ctx = canvas.getContext("2d")
+let p = {x:0,y:0,sx:0,sy:0,facing:0}
 spriteCanvas = document.getElementById("canvas2")
 ctx2 = spriteCanvas.getContext("2d")
 drawOffset = {x:0,y:0}
+ctx.imageSmoothingEnabled = false; // Disable antialiasing
 playerButtons = [-1,-1,-1,-1,-1,-1,-1,-1]
 resolutionMultiplier = Number(canvas.width)/128
 img = document.getElementById("canvas2");
+let timeSince = 0
 
 //resolutionMultiplier = 1\1
 colors = [[0,0,0],[0,0,100],[100,0,0],[0,100,0],[100,50,50],[100,100,100],[150,150,150],[255,255,255],[255,0,0],[255,100,0],[255,255,0],[0,255,0],[100,100,255],[200,200,255],[255,100,200],[255,205,200],[100,100,100]]
 colors2 = [[0,0,0],[0,0,50],[50,0,20],[0,50,50],[50,30,0],[20,20,20],[80,80,80],[255,255,255],[255,0,0],[255,100,0],[255,255,0],[0,255,0],[100,100,255],[200,200,255],[255,100,200],[255,255,200]]
 palmap = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
-//colors[2] = colors2[2]
-g = []
-for (let i = 0;i<64;i++){
-    g.push(flr(rnd(255)))
-}
-px = new Uint8ClampedArray(g)
-sprite = makeImage(px,8,8)
 r=0
 validChars = "qwertyuiopasdfghjklzxcvbnm1234567890_"
 fetch("https://raw.githubusercontent.com/centiweeger22/binko-8/refs/heads/main/carts/bowling_bash.p8")
@@ -53,12 +49,30 @@ function translateCode(inputCode){
     catch{
         doMap=false
     }
+    hhh3 = inputCode.split("__gff__")
+    try{
+    gfFlagsText = hhh3[1].split("__")[0] 
+    gflist = gfFlagsText.split("\n")
+    gfflags = []
+    alert("here "+gflist)
+    for (let i = 0;i<2;i++){
+        alert(i)
+        for (let d = 0;d<128;d++){
+            add(gfflags,gflist[i+1][d])
+        }
+    }
+    alert(gfflags+" is")
+    }
+    catch(err){
+        alert(err+"it wne trokng at ")
+    }
 
     
     //alert(code)
     alert("Splitting: done")
     alert("Replacements: starting")
     newCode = code
+    newCode = newCode.replaceAll("..","+")
     newCode = newCode.replaceAll("^","**")
     newCode = newCode.replaceAll("]","-1]")
     newCode = newCode.replaceAll(" and ","&&")
@@ -290,15 +304,15 @@ function translateCode(inputCode){
                 else{
                     h.push(0)
                     gc = getColor(0)
-                    ctx2.fillStyle = "#000000"
+                    //ctx2.fillStyle = "#000000"
                 }
 
             }
             else{
                 h.push(0)
-                ctx2.fillStyle = "#000000"
+                //ctx2.fillStyle = "#000000"
             }
-            ctx2.fillRect(x*4,y*4-4,4,4)
+            //ctx2.fillRect(x*4,y*4-4,4,4)
         }
         gfx.push(h)
     }
@@ -335,7 +349,14 @@ function translateCode(inputCode){
 
 
     output.innerText = newerCode
+    updateSpriteView(true)
+    alert("im gonna do it!")
+    try{
     eval(newerCode)
+    }
+    catch(err){
+        alert(err)
+    }
 }
 
 
@@ -375,11 +396,30 @@ function sin(n){
 function cos(n){
     return Math.cos(-n*Math.PI*2)
 }
-function mget(){
-    return 0
+function mget(x,y){
+    x = Math.min(Math.max(flr(x),0),127)
+    y = Math.min(Math.max(flr(y),0),127)
+    try{
+     return mapT[y][x]
+    }
+    catch(err){
+            return 1
+      //  alert(err)
+    }
 }
-function mset(){
-
+function fget(t,n){
+    //alert(t+"hh")
+    //alert(gfFlagsText[t]+"h"
+    //alert(gfflags[t]+"a")
+   return gfflags[t]>0
+}
+function mset(x,y,t){
+        x = Math.min(Math.max(flr(x),0),127)
+    y = Math.min(Math.max(flr(y),0),127)
+    mapT[y][x] = t
+}
+function fillp(){
+    
 }
 function pset(x,y,c){
     try{
@@ -418,6 +458,9 @@ function color(){
 
 }
 function line(x1,y1,x2,y2,c){
+    if (c == undefined){
+        c = 7
+    }
     x1 -=drawOffset.x
     x2 -=drawOffset.x
     y1 -=drawOffset.y
@@ -426,7 +469,13 @@ function line(x1,y1,x2,y2,c){
     ctx.beginPath()
     ctx.lineWidth = ceil(resolutionMultiplier/2)*2
     c = getColor(c)
+    try{
     ctx.strokeStyle = rgbToHex(c[0],c[1],c[2])
+
+    }
+    catch(err){
+       ctx.strokeStyle = "#000000" 
+    }
     ctx.moveTo(x1*resolutionMultiplier, y1*resolutionMultiplier);
     ctx.lineTo(x2*resolutionMultiplier, y2*resolutionMultiplier);
     ctx.stroke()
@@ -439,7 +488,7 @@ function atan2(y,x){
 }
 function rectfill(x1,y1,x2,y2){
     ctx.beginPath()
-    ctx.fillRect((x1-drawOffset.x)*resolutionMultiplier,(y1-drawOffset.y)*resolutionMultiplier,(x2-x1+1)*resolutionMultiplier,(y2-y1+1)*resolutionMultiplier)
+    ctx.fillRect((flr(x1)-drawOffset.x)*resolutionMultiplier,(flr(y1)-drawOffset.y)*resolutionMultiplier,flr(x2-x1)*resolutionMultiplier,flr(y2-y1)*resolutionMultiplier)
 }
 function sqrt(d){
     return Math.sqrt(d)
@@ -457,7 +506,9 @@ function circfill(x,y,r,c){
     ctx.beginPath()
     if (typeof c != "object") {alert(c+"f"+cn);c = [0,0,0]}
     ctx.fillStyle = rgbToHex(c[0],c[1],c[2])
-    ctx.arc(x*resolutionMultiplier, y*resolutionMultiplier, r*resolutionMultiplier, 0, 2 * Math.PI);
+    //drawNoAliasingCircle(x, y, flr(r), 'red');
+
+    ctx.arc(Math.round(x)*resolutionMultiplier-0.5, Math.round(y)*resolutionMultiplier-0.5, flr(r)*resolutionMultiplier+0.5, 0, 2 * Math.PI);
     ctx.fill()
     }
 }
@@ -482,15 +533,21 @@ function btnp(d,p){
 function spr(s,xp,yp,w,h,fh,fv){
     if (w==undefined){w=1}
     if (h==undefined){h=1}
-    for (let x1 = 0;x1<8*w;x1++){
-        for (let y1 = 0;y1<8*h;y1++){
-            //alert(gfx)
-            //alert()
-            c = gfx[y1+flr(s/16)*8][x1+8*(s-flr(s/16)*16)]
-            if (c>0)
-            pset(xp+x1,yp+y1,c)
-        }
-    }
+    // for (let x1 = 0;x1<8*w;x1++){
+    //     for (let y1 = 0;y1<8*h;y1++){
+    //         xp = flr(xp)
+    //         yp = flr(yp)
+    //         //alert(gfx)
+    //         //alert()
+    //         c = gfx[y1+flr(s/16)*8][x1+8*(s-flr(s/16)*16)]
+    //         if (c>0)
+    //         //pset(Math.round(xp+x1),Math.round(yp+y1),c)
+    //     }
+    // }
+                mt = s
+                    mtx = mt-flr(mt/16)*16
+                    mty = flr(mt/16)
+    ctx.drawImage(img,mtx*8*4,mty*8*4,w*8*4,h*8*4,flr((xp-drawOffset.x)*resolutionMultiplier),flr((yp-drawOffset.y)*resolutionMultiplier),w*8*resolutionMultiplier,h*8*resolutionMultiplier);
 }
 function sspr(){
     
@@ -540,13 +597,15 @@ function getColor(n){
         return colors2[n-128]
     }
 }
-let timeSince = 0;
 function updateSpriteView(grx){
     if (grx){
         timeSince = 100
     }
     timeSince ++
     if (timeSince>60){
+        //ctx2.clearRect(0, 0, ctx2.width, ctx2.height); // Clear previous content
+        //ctx2.fillStyle = 'rgba(255, 0, 0, 0.5)'; // Semi-transparent red
+        //ctx2.fillRect(0, 0, 512, 512);
         for (let x = 0;x<128;x++){
             for (let y = 0;y<128;y++){
                 ctx2.beginPath()
@@ -556,12 +615,21 @@ function updateSpriteView(grx){
                 ggx = getColor(ggfx)
                 }
                 else{
-                ggx = [0,0,0]
+                ggx = 0
                 }
                 //alert(ggx)
                 if (typeof ggx == "object"){
-                    ctx2.fillStyle = rgbToHex(ggx[0],ggx[1],ggx[2])
-                    ctx2.fillRect(x*4,y*4,4,4)
+                    if (ggx != 0){
+                            ctx2.globalAlpha = 255; // Set global alpha to 50%
+
+                        ctx2.fillStyle = rgbToHex(ggx[0],ggx[1],ggx[2])
+                        ctx2.fillRect(x*4,y*4,4,4)
+                    }
+                    else{
+                        //    ctx2.globalAlpha = 0; // Set global alpha to 50%
+                        //ctx2.fillStyle = rgbToHex(0,0,0)
+                        //ctx2.fillRect(x*4,y*4,4,4)              
+                    }
                 }
             }
         }
@@ -672,7 +740,7 @@ function map(){
                     mty = flr(mt/16)
             //spr(mt,(i*8),(d*8))
                     //ctx.putImageData(sprite,(i*8-drawOffset.x)*resolutionMultiplier,(d*8-drawOffset.y)*resolutionMultiplier)
-                    ctx.drawImage(img,mtx*8*4,mty*8*4,8*4,8*4,(i*8-drawOffset.x)*resolutionMultiplier,(d*8-drawOffset.y)*resolutionMultiplier,8*resolutionMultiplier,8*resolutionMultiplier);
+                    ctx.drawImage(img,mtx*8*4,mty*8*4,8*4,8*4,flr((i*8-drawOffset.x)*resolutionMultiplier),flr((d*8-drawOffset.y)*resolutionMultiplier),8*resolutionMultiplier,8*resolutionMultiplier);
                     //ctx.drawImage(img,16,16,32,32,0,0,8*resolutionMultiplier,8*resolutionMultiplier);
                 }
             }
@@ -681,8 +749,8 @@ function map(){
     }
 }
 function camera(x1,y1){
-    drawOffset.x = x1
-    drawOffset.y = y1
+    drawOffset.x = flr(x1)
+    drawOffset.y = flr(y1)
 }
 function time(){
 
@@ -699,4 +767,11 @@ function makeImage(pixelData,width,height){
   // 3. Copy pixel data to ImageData
 imageData.data.set(pixelData);
 return imageData
+}
+function drawNoAliasingCircle(x, y, radius, color) {
+  ctx.beginPath();
+  ctx.arc(Math.round(x), Math.round(y), radius, 0, 2 * Math.PI);
+  ctx.fillStyle = color;
+  ctx.fill();
+  ctx.closePath();
 }
