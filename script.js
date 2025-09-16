@@ -20,7 +20,7 @@ colors2 = [[0,0,0],[0,0,50],[50,0,20],[0,50,50],[50,30,0],[20,20,20],[80,80,80],
 palmap = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
 r=0
 validChars = "qwertyuiopasdfghjklzxcvbnm1234567890_"
-fetch("https://raw.githubusercontent.com/centiweeger22/binko-8/refs/heads/main/carts/bowling_bash.p8")
+fetch("https://raw.githubusercontent.com/centiweeger22/binko-8/refs/heads/main/carts/surfer.p8")
 .then(x => x.text())
 .then(y => translateCode(y));
 function translateCode(inputCode){
